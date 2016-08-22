@@ -15,11 +15,57 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
+from caesar import encrypt
+
+# html boilerplate for the top of every page
+page_header = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caesar Cipher</title>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <a href="/">Caesar Cipher</a>
+    </h1>
+"""
+
+# html boilerplate for the bottom of every page
+page_footer = """
+</body>
+</html>
+"""
+
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
+        # main form
+	main_form = """
+	<form action="/encrypt" method="post">
+		<label>
+			<strong>Enter some text to be encrypted.</strong>
+			<input type="text" value="%(encrypted)s" name="tbe"/>
+		</label>
+		<input type="submit" name="encrypt"/>
+	</form>
+	"""
+
+class EncryptText(webapp2.RequestHandler):
+	def __init__(self):
+		encrypted = ""
+
+	def post(self):
+		tbe = cgi.escape(self.request.get("tbe"))
+		encrypted = encrypt(tbe, 13)
+		self.redirect('/')
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
+    ('/encrypt', EncryptText)
 ], debug=True)
