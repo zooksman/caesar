@@ -16,7 +16,7 @@
 #
 import webapp2
 import cgi
-from caesar import encrypt
+import caesar
 
 # html boilerplate for the top of every page
 page_header = """
@@ -42,30 +42,36 @@ page_footer = """
 </html>
 """
 
-
-class MainHandler(webapp2.RequestHandler):
+encrypted = ""
+class Index(webapp2.RequestHandler):
     def get(self):
+    	
         # main form
-	main_form = """
-	<form action="/encrypt" method="post">
-		<label>
-			<strong>Enter some text to be encrypted.</strong>
-			<input type="text" value="%(encrypted)s" name="tbe"/>
-		</label>
-		<input type="submit" name="encrypt"/>
-	</form>
-	"""
+		main_form = """
+		<form action="/encrypt" method="post">
+			<label>
+				<strong>Enter the number of places to rotate the string.</strong>
+				<input type="text" name="rot" value="0" />
+			</label>
+			<label>
+				<strong>Enter some text to be encrypted.</strong>
+				<input type="text" name="tbe" value="{}" />
+			</label>
+			<input type="submit" name="encrypt"/>
+		</form>
+		""".format(self.request.get("encrypted"))
+		
+		self.response.write(page_header + main_form + page_footer)
 
 class EncryptText(webapp2.RequestHandler):
-	def __init__(self):
-		encrypted = ""
-
 	def post(self):
 		tbe = cgi.escape(self.request.get("tbe"))
-		encrypted = encrypt(tbe, 13)
-		self.redirect('/')
+		rot = self.request.get("rot")
+		result = caesar.encrypt(tbe, rot)
+		print(encrypted)
+		self.redirect('/?encrypted=' + result)
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', Index),
     ('/encrypt', EncryptText)
 ], debug=True)
